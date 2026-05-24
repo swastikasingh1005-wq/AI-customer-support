@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FrontDesk AI Assistant</title>
+    <!-- Tailwind CSS Engine CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 font-sans h-screen flex flex-col justify-between items-center p-4">
+
+    <!-- Chat Container -->
+    <div class="w-full max-w-lg bg-white rounded-2xl shadow-xl flex flex-col overflow-hidden h-[85vh] border border-slate-100">
+        <!-- Header -->
+        <div class="bg-indigo-600 p-4 text-white flex items-center justify-between">
+            <div>
+                <h1 class="text-lg font-semibold tracking-wide">FrontDesk AI</h1>
+                <p class="text-xs text-indigo-200 flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+                    Autonomous Business Agent
+                </p>
+            </div>
+            <button onclick="window.location.reload()" class="text-xs bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-lg transition">Clear Thread</button>
+        </div>
+
+        <!-- Message Node Display Window -->
+        <div id="chat-window" class="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50/50">
+            <!-- Initial Agent Welcome Message -->
+            <div class="flex justify-start">
+                <div class="bg-white text-slate-800 rounded-2xl rounded-tl-none p-3 max-w-[85%] shadow-sm border border-slate-100 text-sm">
+                    Hello! Welcome to our store. How can I assist you with information, service details, or appointment bookings today?
+                </div>
+            </div>
+        </div>
+
+        <!-- User Input Action Footer Form -->
+        <form id="chat-form" class="p-3 bg-white border-t border-slate-100 flex items-center gap-2">
+            <input 
+                type="text" 
+                id="user-input" 
+                autocomplete="off"
+                placeholder="Ask about slots, make an appointment..." 
+                class="flex-1 p-2.5 bg-slate-50 text-slate-800 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 border border-slate-200 transition"
+                required
+            >
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm px-5 py-2.5 rounded-xl transition shadow-md shadow-indigo-100">
+                Send
+            </button>
+        </form>
+    </div>
+
+    <!-- Script Handling API Communication -->
+    <script>
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const chatWindow = document.getElementById('chat-window');
+
+        function appendMessage(text, isUser = false) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
+            
+            const messageBubble = document.createElement('div');
+            messageBubble.className = isUser 
+                ? 'bg-indigo-600 text-white rounded-2xl rounded-tr-none p-3 max-w-[85%] shadow-md text-sm'
+                : 'bg-white text-slate-800 rounded-2xl rounded-tl-none p-3 max-w-[85%] shadow-sm border border-slate-100 text-sm';
+            
+            messageBubble.innerText = text;
+            wrapper.appendChild(messageBubble);
+            chatWindow.appendChild(wrapper);
+            
+            // Auto-scroll screen down smoothly
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // Render user text immediately to screen
+            appendMessage(message, true);
+            userInput.value = '';
+
+            // Render standard Loading State placeholder
+            const loadingWrapper = document.createElement('div');
+            loadingWrapper.className = 'flex justify-start';
+            loadingWrapper.innerHTML = `<div id="loading-node" class="bg-slate-200 text-slate-500 rounded-2xl rounded-tl-none p-3 text-xs italic animate-pulse">FrontDesk is thinking...</div>`;
+            chatWindow.appendChild(loadingWrapper);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                loadingWrapper.remove(); // Remove loading tracker node
+                
+                appendMessage(data.reply || data.error);
+            } catch (err) {
+                loadingWrapper.remove();
+                appendMessage("Connection error: Unable to contact your backend agent framework.");
+            }
+        });
+    </script>
+</body>
+</html>
