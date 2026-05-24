@@ -3,73 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FrontDesk AI Assistant</title>
-    <!-- Tailwind CSS Engine CDN -->
+    <title>FrontDesk AI - Elite Business Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-50 font-sans h-screen flex flex-col justify-between items-center p-4">
+<body class="bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 font-sans h-screen flex flex-col justify-between items-center p-4 md:p-6 text-slate-100">
 
-    <!-- Chat Container -->
-    <div class="w-full max-w-lg bg-white rounded-2xl shadow-xl flex flex-col overflow-hidden h-[85vh] border border-slate-100">
-        <!-- Header -->
-        <div class="bg-indigo-600 p-4 text-white flex items-center justify-between">
-            <div>
-                <h1 class="text-lg font-semibold tracking-wide">FrontDesk AI</h1>
-                <p class="text-xs text-indigo-200 flex items-center gap-1">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
-                    Autonomous Business Agent
-                </p>
-            </div>
-            <button onclick="window.location.reload()" class="text-xs bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-lg transition">Clear Thread</button>
-        </div>
+    <!-- Main Dynamic Layout Hub Container -->
+    <div class="w-full max-w-4xl bg-slate-900/60 backdrop-blur-xl rounded-3xl shadow-2xl flex flex-col md:flex-row overflow-hidden h-[90vh] border border-slate-800/80">
+        
+        <!-- Left Column Sidebar: Store Promotion & Quick Support Services Menu -->
+        <div class="w-full md:w-80 bg-gradient-to-b from-indigo-900/40 to-slate-900/40 p-5 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-800/80">
+            <div class="space-y-6">
+                <!-- Branding Header -->
+                <div>
+                    <h2 class="text-xl font-bold text-white tracking-wide flex items-center gap-2">
+                        <i class="fa-solid from-indigo-400 to-cyan-400 bg-gradient-to-r bg-clip-text text-transparent fa-robot"></i>
+                        FrontDesk Elite
+                    </h2>
+                    <p class="text-xs text-indigo-300/70 mt-1">Autonomous Customer Experience Suite</p>
+                </div>
 
-        <!-- Message Node Display Window -->
-        <div id="chat-window" class="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50/50">
-            <!-- Initial Agent Welcome Message -->
-            <div class="flex justify-start">
-                <div class="bg-white text-slate-800 rounded-2xl rounded-tl-none p-3 max-w-[85%] shadow-sm border border-slate-100 text-sm">
-                    Hello! Welcome to our store. How can I assist you with information, service details, or appointment bookings today?
+                <!-- Live Store Promotion Widget Display Panel -->
+                <div class="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 rounded-2xl p-4 relative overflow-hidden group">
+                    <div class="absolute -right-4 -top-4 w-12 h-12 bg-amber-500/10 rounded-full blur-xl group-hover:bg-amber-500/20 transition"></div>
+                    <span class="bg-amber-500/20 text-amber-300 font-bold tracking-wider text-[10px] uppercase px-2 py-0.5 rounded-full">Store Special Offer</span>
+                    <h3 class="text-white font-semibold text-sm mt-2">Summer Glow Makeover ✨</h3>
+                    <p class="text-xs text-slate-300 mt-1 leading-relaxed">Book any service today and instantly get 20% off your total at checkout!</p>
+                    <button onclick="sendQuickMessage('Tell me about the 20% off Summer Glow promotion!')" class="mt-3 text-xs font-medium text-amber-300 hover:text-amber-200 flex items-center gap-1 transition">
+                        Claim Deal <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </button>
+                </div>
+
+                <!-- Instant Access System Feature Commands -->
+                <div class="space-y-2">
+                    <span class="text-slate-400 text-[11px] font-semibold tracking-wider uppercase block px-1">Quick Tasks</span>
+                    <button onclick="sendQuickMessage('What time slots do you have available?')" class="w-full bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 text-left px-3 py-2.5 rounded-xl text-xs font-medium text-slate-200 flex items-center gap-2 transition">
+                        <i class="fa-solid fa-calendar-days text-indigo-400"></i> Browse Free Booking Slots
+                    </button>
+                    <button onclick="sendQuickMessage('What services do you offer at the store?')" class="w-full bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 text-left px-3 py-2.5 rounded-xl text-xs font-medium text-slate-200 flex items-center gap-2 transition">
+                        <i class="fa-solid fa-sparkles text-emerald-400"></i> Explore Store Catalog
+                    </button>
                 </div>
             </div>
+
+            <!-- Bottom Guardrail: Immediate Help / Human Handoff Quick Action Trigger -->
+            <div class="mt-4 pt-4 border-t border-slate-800/60">
+                <button onclick="sendQuickMessage('I need urgent assistance, please escalate this thread to a human support agent immediately.')" class="w-full bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 font-medium text-xs px-4 py-3 rounded-xl transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-headset"></i> Connect to Human Support
+                </button>
+            </div>
         </div>
 
-        <!-- User Input Action Footer Form -->
-        <form id="chat-form" class="p-3 bg-white border-t border-slate-100 flex items-center gap-2">
-            <input 
-                type="text" 
-                id="user-input" 
-                autocomplete="off"
-                placeholder="Ask about slots, make an appointment..." 
-                class="flex-1 p-2.5 bg-slate-50 text-slate-800 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 border border-slate-200 transition"
-                required
-            >
-            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm px-5 py-2.5 rounded-xl transition shadow-md shadow-indigo-100">
-                Send
-            </button>
-        </form>
+        <!-- Right Column Sidebar: Primary Conversational Engine Hub Stream -->
+        <div class="flex-1 flex flex-col justify-between overflow-hidden bg-slate-950/40">
+            <!-- Chat Window Header -->
+            <div class="bg-slate-900/80 p-4 border-b border-slate-800/80 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <div class="w-3 h-3 bg-emerald-400 rounded-full border-2 border-slate-900 absolute bottom-0 right-0 animate-ping"></div>
+                        <div class="w-3 h-3 bg-emerald-400 rounded-full border-2 border-slate-900 absolute bottom-0 right-0"></div>
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                            FD
+                        </div>
+                    </div>
+                    <div>
+                        <h1 class="text-sm font-semibold text-white tracking-wide">Concierge Agent AI</h1>
+                        <p class="text-[11px] text-slate-400">Powered by Gemini 2.5 Intelligence Engine</p>
+                    </div>
+                </div>
+                <button onclick="window.location.reload()" class="text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-right text-[10px]"></i> Reset Chat
+                </button>
+            </div>
+
+            <!-- Chat Streaming Canvas Display Pane -->
+            <div id="chat-window" class="flex-1 p-4 md:p-6 overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-slate-800">
+                <!-- Initial Welcome Bubble -->
+                <div class="flex justify-start">
+                    <div class="bg-slate-900 border border-slate-800/80 text-slate-200 rounded-2xl rounded-tl-none p-3.5 max-w-[85%] shadow-md text-sm leading-relaxed">
+                        Hello! Welcome to our premier store dashboard. ✨ How can I assist you with information, tracking current product deals, or finding an attractive slot for your appointment today?
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Input Field Footer Interface -->
+            <form id="chat-form" class="p-4 bg-slate-900/90 border-t border-slate-800/80 flex items-center gap-3">
+                <div class="flex-1 relative flex items-center">
+                    <i class="fa-regular fa-keyboard text-slate-400 absolute left-3.5 pointer-events-none"></i>
+                    <input 
+                        type="text" 
+                        id="user-input" 
+                        autocomplete="off"
+                        placeholder="Type your question or query here..." 
+                        class="w-full pl-11 pr-4 py-3 bg-slate-950 border border-slate-800 text-slate-100 placeholder-slate-500 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                        required
+                    >
+                </div>
+                <button type="submit" class="bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-semibold text-sm px-6 py-3 rounded-xl transition shadow-lg shadow-indigo-950 flex items-center gap-2">
+                    <span>Send</span> <i class="fa-solid fa-paper-plane text-xs opacity-80"></i>
+                </button>
+            </form>
+        </div>
     </div>
 
-    <!-- Script Handling API Communication -->
+    <!-- Script Handling Advanced Client UI Logic Configurations -->
     <script>
         const chatForm = document.getElementById('chat-form');
         const userInput = document.getElementById('user-input');
         const chatWindow = document.getElementById('chat-window');
 
-        function appendMessage(text, isUser = false) {
+        function appendMessage(text, isUser = false, customHtml = null) {
             const wrapper = document.createElement('div');
             wrapper.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
             
             const messageBubble = document.createElement('div');
             messageBubble.className = isUser 
-                ? 'bg-indigo-600 text-white rounded-2xl rounded-tr-none p-3 max-w-[85%] shadow-md text-sm'
-                : 'bg-white text-slate-800 rounded-2xl rounded-tl-none p-3 max-w-[85%] shadow-sm border border-slate-100 text-sm';
+                ? 'bg-gradient-to-r from-indigo-500 to-violet-600 text-white rounded-2xl rounded-tr-none p-3.5 max-w-[85%] shadow-lg text-sm font-medium border border-indigo-400/20'
+                : 'bg-slate-900 border border-slate-800 text-slate-200 rounded-2xl rounded-tl-none p-3.5 max-w-[85%] shadow-md text-sm leading-relaxed';
             
-            messageBubble.innerText = text;
+            if (customHtml) {
+                messageBubble.innerHTML = customHtml;
+            } else {
+                messageBubble.innerText = text;
+            }
+            
             wrapper.appendChild(messageBubble);
             chatWindow.appendChild(wrapper);
-            
-            // Auto-scroll screen down smoothly
             chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        // Intercept and handle dynamic slot card selection actions
+        function selectSlot(timeString) {
+            sendQuickMessage(`I would like to book the slot for ${timeString}`);
+        }
+
+        function sendQuickMessage(msgText) {
+            userInput.value = msgText;
+            chatForm.dispatchEvent(new Event('submit'));
         }
 
         chatForm.addEventListener('submit', async (e) => {
@@ -77,14 +148,16 @@
             const message = userInput.value.trim();
             if (!message) return;
 
-            // Render user text immediately to screen
             appendMessage(message, true);
             userInput.value = '';
 
-            // Render standard Loading State placeholder
+            // Loading Node Generation Block
             const loadingWrapper = document.createElement('div');
             loadingWrapper.className = 'flex justify-start';
-            loadingWrapper.innerHTML = `<div id="loading-node" class="bg-slate-200 text-slate-500 rounded-2xl rounded-tl-none p-3 text-xs italic animate-pulse">FrontDesk is thinking...</div>`;
+            loadingWrapper.innerHTML = `
+                <div class="bg-slate-900/50 border border-slate-800 text-slate-400 rounded-2xl rounded-tl-none px-4 py-3 text-xs flex items-center gap-2">
+                    <i class="fa-solid fa-spinner animate-spin text-indigo-400"></i> FrontDesk is reading tools...
+                </div>`;
             chatWindow.appendChild(loadingWrapper);
             chatWindow.scrollTop = chatWindow.scrollHeight;
 
@@ -96,9 +169,23 @@
                 });
                 
                 const data = await response.json();
-                loadingWrapper.remove(); // Remove loading tracker node
+                loadingWrapper.remove();
                 
-                appendMessage(data.reply || data.error);
+                // Parse and verify if the data packet payload includes interactive data metadata injections
+                if (data.ui_type === "slots" && data.slots_data) {
+                    let cardHtml = `<p class="mb-3 font-semibold text-indigo-300"><i class="fa-regular fa-clock mr-1.5"></i> Select an attractive time slot below:</p><div class="grid grid-cols-1 gap-2.5 mt-2">`;
+                    data.slots_data.forEach(slot => {
+                        cardHtml += `
+                            <button onclick="selectSlot('${slot}')" class="w-full text-left bg-slate-950/60 hover:bg-indigo-950/40 border border-slate-800 hover:border-indigo-500/40 p-3 rounded-xl transition duration-200 group flex items-center justify-between">
+                                <span class="font-medium text-slate-200 group-hover:text-white transition text-xs">${slot}</span>
+                                <span class="text-[11px] font-semibold bg-indigo-500/10 text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white px-2.5 py-1 rounded-lg transition">Reserve Slot</span>
+                            </button>`;
+                    });
+                    cardHtml += `</div>`;
+                    appendMessage(null, false, cardHtml);
+                } else {
+                    appendMessage(data.reply || data.error);
+                }
             } catch (err) {
                 loadingWrapper.remove();
                 appendMessage("Connection error: Unable to contact your backend agent framework.");

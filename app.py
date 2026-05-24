@@ -6,49 +6,44 @@ from google.genai import types
 
 app = Flask(__name__)
 
-# Initialize the Gemini Client (Picks up GEMINI_API_KEY from environment variables)
-client = genai.Client()
+# Core hardcoded key integration or secure pickup mapping fallback
+API_KEY = os.environ.get("GEMINI_API_KEY", "AIzaSyA1dkLzmH57MeLQ8CzY5JrXwwZAIozHoW0")
+client = genai.Client(api_key=API_KEY)
 
-# Core Session Memory (In production, map this to a database using a unique session ID)
 CHAT_HISTORY = []
-
-# Mock internal database state
 AVAILABLE_SLOTS = ["Monday at 10:00 AM", "Monday at 2:00 PM", "Wednesday at 4:00 PM"]
 BOOKINGS = []
 
 # ==========================================
-# DEFINING THE AGENT'S PYTHON TOOLS
+# DEFINING THE AGENT'S TOOLS
 # ==========================================
 
 def check_calendar() -> str:
     """Checks the internal business database for available open appointment time slots."""
     if not AVAILABLE_SLOTS:
-        return "No open slots available at the moment."
-    return json.dumps({"available_slots": AVAILABLE_SLOTS})
+        return json.dumps({"status": "empty", "available_slots": []})
+    return json.dumps({"status": "success", "available_slots": AVAILABLE_SLOTS})
 
 def create_booking(customer_name: str, email: str, selected_slot: str) -> str:
     """Creates a locked appointment booking inside the database for a customer."""
     if selected_slot not in AVAILABLE_SLOTS:
         return json.dumps({"success": False, "error": "That slot is no longer available."})
     
-    # Process the booking action
     AVAILABLE_SLOTS.remove(selected_slot)
     booking_id = f"BK-{len(BOOKINGS) + 1000}"
-    new_booking = {
+    BOOKINGS.append({
         "id": booking_id,
         "name": customer_name,
         "email": email,
         "slot": selected_slot
-    }
-    BOOKINGS.append(new_booking)
+    })
     return json.dumps({"success": True, "booking_id": booking_id, "confirmed_slot": selected_slot})
 
 def escalate_to_human(reason: str) -> str:
     """Triggers an emergency handoff to a live human employee if the customer is frustrated, angry, or confused."""
     print(f"\n🚨 [CRITICAL ESCALATION NOTICE]: {reason}\n")
-    return json.dumps({"status": "escalated", "message": "A manager has been paged and is jumping into this chat thread immediately."})
+    return json.dumps({"status": "escalated", "message": "A human support manager has been paged via internal alerts and is joining this interface right now."})
 
-# Mapping strings to actual executable references
 TOOL_MAP = {
     "check_calendar": check_calendar,
     "create_booking": create_booking,
@@ -61,7 +56,6 @@ TOOL_MAP = {
 
 @app.route('/')
 def home():
-    # Serves the front-end chat interface directly
     return send_file('index.html')
 
 @app.route('/api/chat', methods=['POST'])
@@ -72,25 +66,22 @@ def chat():
     if not user_message:
         return jsonify({"error": "Empty message"}), 400
 
-    # Append user input into the global thread state
-    CHAT_HISTORY.append(types.Content(role="user", parts=[types.Part.from_text(user_message)]))
+    CHAT_HISTORY.append({"role": "user", "parts": [{"text": user_message}]})
     
-    # Configure system guardrails and hand over Python functions as tools
     config = types.GenerateContentConfig(
         system_instruction="""
-            You are 'FrontDesk AI', a highly competent, friendly, and practical assistant for a local small business.
-            Your job is to answer queries, check calendar availability, and lock in direct bookings.
+            You are 'FrontDesk Elite AI', an upscale, polite customer concierge agent.
             
-            OPERATIONAL MANDATES:
-            1. If a user wants to book, you MUST first execute 'check_calendar' to see what's actually free. 
-            2. Never guess or make up appointment slots.
-            3. To finalize a booking, you must collect their full name, email, and explicit time preference, then call 'create_booking'.
-            4. SAFETY RULE: If the customer uses foul language, shows strong signs of anger, or demands human intervention, immediately invoke the 'escalate_to_human' tool.
+            CORE FEATURES & KNOWLEDGE MANDATES:
+            1. STORE PROMOTIONS: We currently run a 'Summer Glow Makeover' promotion. It gives customers 20% off any store service if they book today. Enthusiastically pitch this deal if users ask about special offers, promos, or discounts.
+            2. GENERAL STORE OPERATIONS: We are an elite local salon and wellness boutique offering premium styling, haircare, and facial treatments.
+            3. CUSTOMER SUPPORT: Help users find bookings or answer common questions elegantly. 
+            4. BOOKINGS: You must call 'check_calendar' to review slots. If the customer requests an appointment, collect their Name, Email, and preferred Slot, then call 'create_booking'.
+            5. ESCALATIONS: If a human support connection is requested or negative user anger is detected, call 'escalate_to_human'.
         """,
         tools=[check_calendar, create_booking, escalate_to_human]
     )
     
-    # Run the core Observe-Think-Act reasoning loop
     try:
         response = client.models.generate_content(
             model='gemini-2.5-flash',
@@ -98,26 +89,34 @@ def chat():
             config=config
         )
         
-        # Check if the model decided to execute an action (Function Call)
         if response.function_calls:
             for call in response.function_calls:
                 tool_name = call.name
                 arguments = call.args
                 
-                # Execute the mapped python tool matching the model's call request
                 if tool_name in TOOL_MAP:
-                    tool_output = TOOL_MAP[tool_name](**arguments)
+                    tool_output_str = TOOL_MAP[tool_name](**arguments)
+                    tool_output = json.loads(tool_output_str)
                     
-                    # Log the historical track of the tool invocation
                     CHAT_HISTORY.append(response.candidates[0].content)
                     
-                    # Provide the function output response back into the context
-                    CHAT_HISTORY.append(types.Content(
-                        role="user", 
-                        parts=[types.Part.from_function_response(name=tool_name, response={"result": tool_output})]
-                    ))
+                    CHAT_HISTORY.append({
+                        "role": "tool",
+                        "parts": [{
+                            "function_response": {
+                                "name": tool_name,
+                                "response": {"result": tool_output_str}
+                            }
+                        }]
+                    })
                     
-                    # Second model pass allows the AI to translate the tool data back into plain language
+                    # Intercept flow context explicitly to pass beautiful interactive cards for open calendar slots
+                    if tool_name == "check_calendar" and tool_output.get("status") == "success":
+                        return jsonify({
+                            "ui_type": "slots",
+                            "slots_data": tool_output.get("available_slots", [])
+                        })
+                    
                     final_response = client.models.generate_content(
                         model='gemini-2.5-flash',
                         contents=CHAT_HISTORY,
@@ -126,12 +125,12 @@ def chat():
                     CHAT_HISTORY.append(final_response.candidates[0].content)
                     return jsonify({"reply": final_response.text})
         
-        # Standard textual response path
         CHAT_HISTORY.append(response.candidates[0].content)
         return jsonify({"reply": response.text})
 
     except Exception as e:
-        return jsonify({"reply": f"System engine error: {str(e)}"}), 500
+        print(f"CRASH ERROR LOGGED: {str(e)}")
+        return jsonify({"reply": f"Backend Error: {str(e)}"}), 500
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
